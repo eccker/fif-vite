@@ -1,4 +1,4 @@
-// Collection of 256 Unsplash images with consistent themes (abstract, geometric, patterns)
+// Collection of Unsplash images for the game
 export const imageCollection = [
   'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=300&q=80',
   'https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=300&q=80',
@@ -10,7 +10,5 @@ export const imageCollection = [
   'https://images.unsplash.com/photo-1557683304-673a23048d34?auto=format&fit=crop&w=300&q=80',
   'https://images.unsplash.com/photo-1557683311-eac922347aa1?auto=format&fit=crop&w=300&q=80',
   'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=300&q=80',
-  'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=300&q=80',
-  // ... continuing with more URLs to reach 256 total (truncated for brevity)
-  'https://images.unsplash.com/photo-1579546929662-711aa81148cf?auto=format&fit=crop&w=300&q=80'
+  // Add more image URLs as needed
 ];

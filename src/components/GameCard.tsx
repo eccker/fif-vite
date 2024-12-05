@@ -1,18 +1,20 @@
 import React, { useRef, useEffect } from 'react';
 import { useDragContext } from '../contexts/DragContext';
+import { useGame } from '../contexts/GameContext';
 import { useDraggable } from '../hooks/useDraggable';
 
 interface GameCardProps {
   imageUrl: string;
   deckId: string;
   index: number;
+  cardId: string;
 }
 
-export function GameCard({ imageUrl, deckId, index }: GameCardProps) {
+export function GameCard({ imageUrl, deckId, index, cardId }: GameCardProps) {
   const [isHighlighted, setIsHighlighted] = React.useState(false);
   const [isMatching, setIsMatching] = React.useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const cardId = `${deckId}-${index}`;
+  const { matchCards } = useGame();
   
   const { 
     draggedCard,
@@ -36,6 +38,9 @@ export function GameCard({ imageUrl, deckId, index }: GameCardProps) {
       
       if (isUnder) {
         setHoveredCard({ id: cardId, imageUrl });
+        if (draggedImageUrl === imageUrl) {
+          matchCards(draggedCard, cardId);
+        }
       } else if (hoveredCard?.id === cardId) {
         setHoveredCard(null);
       }
@@ -46,7 +51,7 @@ export function GameCard({ imageUrl, deckId, index }: GameCardProps) {
       setIsHighlighted(false);
       setIsMatching(false);
     }
-  }, [mousePosition, draggedCard, cardId, draggedImageUrl, imageUrl, hoveredCard?.id, setHoveredCard]);
+  }, [mousePosition, draggedCard, cardId, draggedImageUrl, imageUrl, hoveredCard?.id, setHoveredCard, matchCards]);
 
   const getHighlightClasses = () => {
     if (isDragging) {
