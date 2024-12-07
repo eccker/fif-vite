@@ -1,5 +1,6 @@
 import React from 'react';
 import { useGameContext } from '../contexts/GameContext';
+import { Shuffle } from 'lucide-react';
 
 interface ProgressBarProps {
   timeLimit: number;
@@ -9,7 +10,7 @@ interface ProgressBarProps {
 export function ProgressBar({ timeLimit, startTime }: ProgressBarProps) {
   const [progress, setProgress] = React.useState(100);
   const [timeLeft, setTimeLeft] = React.useState(timeLimit);
-  const { setIsGameOver, isGameOver, isSuccess, isStarted } = useGameContext();
+  const { setIsGameOver, isGameOver, isSuccess, isStarted, shuffleCount } = useGameContext();
 
   React.useEffect(() => {
     if (!isStarted) {
@@ -49,11 +50,19 @@ export function ProgressBar({ timeLimit, startTime }: ProgressBarProps) {
 
   return (
     <div className="w-full">
-      <div className="flex justify-between text-sm text-gray-600 mb-1">
-        <span>Time remaining</span>
-        <span>{timeLeft}s</span>
+      <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <div className="flex items-center gap-2">
+          <span>Time remaining</span>
+          <span>{timeLeft}s</span>
+        </div>
+        {isStarted && (
+          <div className="flex items-center gap-1">
+            <Shuffle className="w-4 h-4" />
+            <span>×{shuffleCount}</span>
+          </div>
+        )}
       </div>
-      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div
           className={`h-full transition-all duration-100 ${getProgressColor()}`}
           style={{ width: `${progress}%` }}

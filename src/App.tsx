@@ -8,9 +8,11 @@ import { SuccessMessage } from './components/SuccessMessage';
 import { LivesIndicator } from './components/LivesIndicator';
 import { LevelIndicator } from './components/LevelIndicator';
 import { ScoreIndicator } from './components/ScoreIndicator';
+import { Menu } from './components/Menu';
 import { Layout } from './components/Layout';
 import { DragProvider } from './contexts/DragContext';
 import { GameProvider, useGameContext } from './contexts/GameContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 function GameContent() {
   const { 
@@ -24,11 +26,12 @@ function GameContent() {
 
   return (
     <Layout>
+      <Menu />
       <header className="flex-none text-center mb-2">
         <div className="flex items-center justify-center gap-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Find It First</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Find It First</h1>
         </div>
-        <p className="text-lg text-gray-600">Find a match before time expires</p>
+        <p className="text-lg text-gray-600 dark:text-gray-300">Find a match before time expires</p>
         <div className="mt-2 px-4 max-w-md mx-auto space-y-2">
           <div className="flex justify-center items-center gap-4">
             <LivesIndicator />
@@ -72,11 +75,13 @@ function GameContent() {
 
 function App() {
   return (
-    <GameProvider>
-      <DragProvider>
-        <GameContent />
-      </DragProvider>
-    </GameProvider>
+    <ThemeProvider>
+      <GameProvider>
+        <DragProvider>
+          <GameContent />
+        </DragProvider>
+      </GameProvider>
+    </ThemeProvider>
   );
 }
 

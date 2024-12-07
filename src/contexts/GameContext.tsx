@@ -65,16 +65,23 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (newLives <= 0) {
         setIsStarted(false);
       }
+      // Keep the current level's state when time expires
+      setNextState({
+        ...gameState,
+        startTime: Date.now()
+      });
     }
   };
 
   const resetGame = () => {
-    if (lives <= 0 || gameState.currentSetIndex === MAX_LEVEL - 1) {
+    if (lives <= 0 || (isSuccess && gameState.currentSetIndex === MAX_LEVEL - 1)) {
+      // Only reset to initial state if game is over (no lives) or completed all levels
       setLives(INITIAL_LIVES);
       setScore(0);
       const newState = initializeGameState();
       setGameState(newState);
     } else if (nextState) {
+      // Apply next state (either next level or retry current level)
       setGameState(state => ({
         ...state,
         ...nextState,
@@ -82,6 +89,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }));
       setNextState(null);
     } else {
+      // Just reset the timer
       setGameState(state => ({
         ...state,
         startTime: Date.now()
