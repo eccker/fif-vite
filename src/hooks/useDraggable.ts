@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useDragContext } from '../contexts/DragContext';
+import { useGameContext } from '../contexts/GameContext';
 
 interface Position {
   x: number;
@@ -11,19 +12,32 @@ export function useDraggable(cardId: string, imageUrl: string) {
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const startPosRef = useRef<Position>({ x: 0, y: 0 });
   const dragStartPosRef = useRef<Position>({ x: 0, y: 0 });
+  const hasDraggedRef = useRef(false);
+  const startTimeRef = useRef(0);
 
   const { 
     setDraggedCard, 
     setDraggedImageUrl,
     setMousePosition,
-    setHoveredCard 
+    setHoveredCard,
+    hoveredCard,
+    draggedImageUrl,
+    setIsDragging: setGlobalIsDragging
   } = useDragContext();
+
+  const { setIsGameOver, isGameOver } = useGameContext();
 
   const handleMove = (clientX: number, clientY: number) => {
     if (!isDragging) return;
-
+    
     const deltaX = clientX - dragStartPosRef.current.x;
     const deltaY = clientY - dragStartPosRef.current.y;
+    
+    // Consider it a drag if moved more than 5 pixels in any direction
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+      hasDraggedRef.current = true;
+      setGlobalIsDragging(true);
+    }
 
     setPosition({
       x: startPosRef.current.x + deltaX,
@@ -35,11 +49,27 @@ export function useDraggable(cardId: string, imageUrl: string) {
 
   const handleEnd = () => {
     if (isDragging) {
+      const dragDuration = Date.now() - startTimeRef.current;
+      
+      // Only consider it a match if:
+      // 1. The user actually dragged (not just clicked)
+      // 2. There's a hovered card
+      // 3. The images match
+      // 4. The drag lasted more than 100ms
+      if (hasDraggedRef.current && 
+          hoveredCard && 
+          draggedImageUrl === hoveredCard.imageUrl &&
+          dragDuration > 100) {
+        setIsGameOver(true, true, draggedImageUrl);
+      }
+      
       setIsDragging(false);
+      setGlobalIsDragging(false);
       setPosition({ x: 0, y: 0 });
       setDraggedCard(null);
       setDraggedImageUrl(null);
       setHoveredCard(null);
+      hasDraggedRef.current = false;
     }
   };
 
@@ -66,15 +96,19 @@ export function useDraggable(cardId: string, imageUrl: string) {
       window.removeEventListener('touchend', handleEnd);
       window.removeEventListener('touchcancel', handleEnd);
     };
-  }, [isDragging]);
+  }, [isDragging, hoveredCard, draggedImageUrl]);
 
   const handleStart = (clientX: number, clientY: number) => {
+    if (isGameOver) return;
+    
     setIsDragging(true);
     setDraggedCard(cardId);
     setDraggedImageUrl(imageUrl);
     
     startPosRef.current = position;
     dragStartPosRef.current = { x: clientX, y: clientY };
+    hasDraggedRef.current = false;
+    startTimeRef.current = Date.now();
   };
 
   return {

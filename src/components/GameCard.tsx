@@ -1,33 +1,34 @@
 import React, { useRef, useEffect } from 'react';
 import { useDragContext } from '../contexts/DragContext';
-import { useGame } from '../contexts/GameContext';
+import { useGameContext } from '../contexts/GameContext';
 import { useDraggable } from '../hooks/useDraggable';
 
 interface GameCardProps {
   imageUrl: string;
   deckId: string;
   index: number;
-  cardId: string;
 }
 
-export function GameCard({ imageUrl, deckId, index, cardId }: GameCardProps) {
+export function GameCard({ imageUrl, deckId, index }: GameCardProps) {
   const [isHighlighted, setIsHighlighted] = React.useState(false);
   const [isMatching, setIsMatching] = React.useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const { matchCards } = useGame();
+  const cardId = `${deckId}-${index}`;
   
+  const { isGameOver, isStarted } = useGameContext();
   const { 
     draggedCard,
     draggedImageUrl,
     mousePosition,
     hoveredCard,
-    setHoveredCard 
+    setHoveredCard,
+    isDragging: isGlobalDragging 
   } = useDragContext();
 
   const { isDragging, position, handlers } = useDraggable(cardId, imageUrl);
 
   useEffect(() => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || isGameOver || !isStarted || !isGlobalDragging) return;
 
     const rect = cardRef.current.getBoundingClientRect();
     if (draggedCard && draggedCard !== cardId) {
@@ -38,9 +39,6 @@ export function GameCard({ imageUrl, deckId, index, cardId }: GameCardProps) {
       
       if (isUnder) {
         setHoveredCard({ id: cardId, imageUrl });
-        if (draggedImageUrl === imageUrl) {
-          matchCards(draggedCard, cardId);
-        }
       } else if (hoveredCard?.id === cardId) {
         setHoveredCard(null);
       }
@@ -51,7 +49,7 @@ export function GameCard({ imageUrl, deckId, index, cardId }: GameCardProps) {
       setIsHighlighted(false);
       setIsMatching(false);
     }
-  }, [mousePosition, draggedCard, cardId, draggedImageUrl, imageUrl, hoveredCard?.id, setHoveredCard, matchCards]);
+  }, [mousePosition, draggedCard, cardId, draggedImageUrl, imageUrl, hoveredCard?.id, setHoveredCard, isGameOver, isStarted, isGlobalDragging]);
 
   const getHighlightClasses = () => {
     if (isDragging) {
@@ -66,14 +64,19 @@ export function GameCard({ imageUrl, deckId, index, cardId }: GameCardProps) {
     return '';
   };
 
+  const getCursorClass = () => {
+    if (isGameOver || !isStarted) return 'cursor-not-allowed';
+    return 'cursor-grab active:cursor-grabbing';
+  };
+
   return (
     <div className="relative w-full h-full">
       <div
         ref={cardRef}
-        {...handlers}
-        className={`absolute inset-0 rounded-lg overflow-hidden shadow-lg cursor-grab active:cursor-grabbing transition-all duration-300 ${
+        {...(!isGameOver && isStarted ? handlers : {})}
+        className={`absolute inset-0 rounded-lg overflow-hidden shadow-lg transition-all duration-300 ${
           isDragging ? 'shadow-2xl scale-105 z-50' : 'hover:shadow-xl'
-        } ${getHighlightClasses()}`}
+        } ${getHighlightClasses()} ${getCursorClass()}`}
         style={{
           transform: `translate(${position.x}px, ${position.y}px)`,
           transition: isDragging ? 'none' : 'all 0.3s ease-out',
@@ -84,7 +87,9 @@ export function GameCard({ imageUrl, deckId, index, cardId }: GameCardProps) {
         <img
           src={imageUrl}
           alt="Game card"
-          className="w-full h-full object-cover pointer-events-none"
+          className={`w-full h-full object-cover pointer-events-none ${
+            isGameOver || !isStarted ? 'blur-sm brightness-75' : ''
+          }`}
           loading="lazy"
           draggable={false}
         />

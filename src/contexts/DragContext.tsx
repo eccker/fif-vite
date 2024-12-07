@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface Position {
   x: number;
@@ -19,15 +19,18 @@ interface DragContextType {
   setMousePosition: (position: Position) => void;
   hoveredCard: HoveredCard | null;
   setHoveredCard: (card: HoveredCard | null) => void;
+  isDragging: boolean;
+  setIsDragging: (value: boolean) => void;
 }
 
 const DragContext = createContext<DragContextType | undefined>(undefined);
 
-export function DragProvider({ children }: { children: ReactNode }) {
+export function DragProvider({ children }: { children: React.ReactNode }) {
   const [draggedCard, setDraggedCard] = useState<string | null>(null);
   const [draggedImageUrl, setDraggedImageUrl] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<Position>({ x: 0, y: 0 });
   const [hoveredCard, setHoveredCard] = useState<HoveredCard | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   return (
     <DragContext.Provider 
@@ -39,7 +42,9 @@ export function DragProvider({ children }: { children: ReactNode }) {
         mousePosition, 
         setMousePosition,
         hoveredCard,
-        setHoveredCard
+        setHoveredCard,
+        isDragging,
+        setIsDragging
       }}
     >
       {children}
