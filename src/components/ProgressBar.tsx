@@ -25,21 +25,27 @@ export function ProgressBar({ timeLimit, startTime }: ProgressBarProps) {
         return;
       }
 
-      const elapsed = (Date.now() - startTime) / 1000;
+      const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, timeLimit - elapsed);
       const currentProgress = (remaining / timeLimit) * 100;
       
       setProgress(currentProgress);
-      setTimeLeft(Math.ceil(remaining));
+      setTimeLeft(remaining);
 
       if (remaining <= 0 && !isSuccess) {
         clearInterval(interval);
         setIsGameOver(true, false);
       }
-    }, 100);
+    }, 16); // Update roughly every frame for smooth animation
 
     return () => clearInterval(interval);
   }, [timeLimit, startTime, setIsGameOver, isGameOver, isSuccess, isStarted]);
+
+  const formatTime = (ms: number) => {
+    const seconds = Math.floor(ms / 1000);
+    const milliseconds = Math.floor((ms % 1000) / 10); // Get 2 digits of milliseconds
+    return `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
+  };
 
   const getProgressColor = () => {
     if (!isStarted) return 'bg-gray-300';
@@ -53,7 +59,7 @@ export function ProgressBar({ timeLimit, startTime }: ProgressBarProps) {
       <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
         <div className="flex items-center gap-2">
           <span>Time remaining</span>
-          <span>{timeLeft}s</span>
+          <span>{formatTime(timeLeft)}</span>
         </div>
         {isStarted && (
           <div className="flex items-center gap-1">
@@ -64,7 +70,7 @@ export function ProgressBar({ timeLimit, startTime }: ProgressBarProps) {
       </div>
       <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div
-          className={`h-full transition-all duration-100 ${getProgressColor()}`}
+          className={`h-full transition-all duration-[16ms] ${getProgressColor()}`}
           style={{ width: `${progress}%` }}
         />
       </div>

@@ -5,10 +5,11 @@ import { ScoreBreakdown } from './ScoreBreakdown';
 import { ContinueButton } from './ContinueButton';
 import { SlideToTryAgain } from './SlideToTryAgain';
 import { RetryButton } from './RetryButton';
+import deckSamples from '../data/deckSamples.json';
 
 export function SuccessMessage() {
   const { isSuccess, lives, gameState, score, shuffleCount, resetGame } = useGameContext();
-  const isLastLevel = gameState.currentSetIndex === 4;
+  const isLastLevel = gameState.currentSetIndex === deckSamples.length - 1;
   const elapsedTime = (Date.now() - gameState.startTime) / 1000;
 
   const handleComplete = () => {

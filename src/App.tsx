@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CardDeck } from './components/CardDeck';
 import { ReloadButton } from './components/ReloadButton';
 import { StartButton } from './components/StartButton';
@@ -10,9 +10,12 @@ import { LevelIndicator } from './components/LevelIndicator';
 import { ScoreIndicator } from './components/ScoreIndicator';
 import { Menu } from './components/Menu';
 import { Layout } from './components/Layout';
+import { ImagePreloader } from './components/ImagePreloader';
 import { DragProvider } from './contexts/DragContext';
-import { GameProvider, useGameContext } from './contexts/GameContext';
+import { GameProvider } from './contexts/GameContext';
+import { useGameContext } from './contexts/GameContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { SocketProvider } from './contexts/SocketContext';
 
 function GameContent() {
   const { 
@@ -74,13 +77,19 @@ function GameContent() {
 }
 
 function App() {
+  const [isLoaded, setIsLoaded] = useState(false);
+
   return (
     <ThemeProvider>
-      <GameProvider>
-        <DragProvider>
-          <GameContent />
-        </DragProvider>
-      </GameProvider>
+      <SocketProvider>
+        <GameProvider>
+          <DragProvider>
+            <ImagePreloader onComplete={() => setIsLoaded(true)}>
+              <GameContent />
+            </ImagePreloader>
+          </DragProvider>
+        </GameProvider>
+      </SocketProvider>
     </ThemeProvider>
   );
 }

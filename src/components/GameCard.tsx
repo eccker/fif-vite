@@ -87,8 +87,8 @@ export function GameCard({ imageUrl, deckId, index }: GameCardProps) {
         <img
           src={imageUrl}
           alt="Game card"
-          className={`w-full h-full object-cover pointer-events-none ${
-            isGameOver || !isStarted ? 'blur-sm brightness-75' : ''
+          className={`w-full h-full object-cover pointer-events-none transition-all duration-300 ${
+            !isStarted ? 'blur-sm brightness-75' : ''
           }`}
           loading="lazy"
           draggable={false}

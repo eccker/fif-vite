@@ -11,7 +11,7 @@ interface ScoreBreakdownProps {
 export function ScoreBreakdown({ level, elapsedTime, shuffles }: ScoreBreakdownProps) {
   const { gameState, matchedImageUrl } = useGameContext();
   const levelScore = level * 1000;
-  const timeRatio = Math.max(0, (gameState.timeLimit - elapsedTime) / gameState.timeLimit);
+  const timeRatio = Math.max(0, (gameState.timeLimit - (elapsedTime * 1000)) / gameState.timeLimit);
   const timeScore = Math.floor(level * 1000 * timeRatio);
   const shufflePenalty = shuffles * 100;
   const totalScore = Math.max(0, levelScore + timeScore - shufflePenalty);
