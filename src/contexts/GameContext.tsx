@@ -20,7 +20,10 @@ interface GameContextType {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 const INITIAL_LIVES = 3;
-const MAX_LEVEL = deckSamples.length;
+
+
+const deckSamplesTyped: any[] = deckSamples as any[];
+const MAX_LEVEL = deckSamplesTyped.length;
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [gameState, setGameState] = useState<GameState>(initializeGameState());
