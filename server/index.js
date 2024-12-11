@@ -11,14 +11,9 @@ const __dirname = dirname(__filename);
 
 async function startServer() {
   try {
-    // Ensure data directories exist
-    const srcDataDir = join(__dirname, '..', 'src', 'data');
-    const distDataDir = join(__dirname, '..', 'dist', 'data');
-    
-    await Promise.all([
-      ensureDirectory(srcDataDir),
-      ensureDirectory(distDataDir)
-    ]);
+    // Ensure metadata directory exists
+    const metadataDir = join(__dirname, 'metadata');
+    await ensureDirectory(metadataDir);
 
     const app = express();
     const httpServer = createServer(app);
@@ -33,14 +28,13 @@ async function startServer() {
     app.use(express.static(join(__dirname, '../dist')));
 
     const gameStateManager = new GameStateManager();
-    
-    // Initialize game state before setting up socket handlers
-    await gameStateManager.initialize();
 
     io.on('connection', (socket) => {
       console.log('[server/index.js:io.connection] Client connected');
 
       socket.on('requestNewGame', async () => {
+      console.log('[server/index.js:requestNewGame] New Game Requested');
+        
         try {
           const gameData = await gameStateManager.createNewGame();
           socket.emit('gameData', gameData);

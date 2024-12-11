@@ -11,21 +11,63 @@ import { ScoreIndicator } from './components/ScoreIndicator';
 import { Menu } from './components/Menu';
 import { Layout } from './components/Layout';
 import { ImagePreloader } from './components/ImagePreloader';
+import { LoadingState } from './components/LoadingState';
 import { DragProvider } from './contexts/DragContext';
 import { GameProvider } from './contexts/GameContext';
 import { useGameContext } from './contexts/GameContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SocketProvider } from './contexts/SocketContext';
+import { useSocket } from './contexts/SocketContext';
 
 function GameContent() {
+  const { gameData, isGenerating } = useSocket();
   const { 
     gameState, 
     isGameOver, 
+    isSuccess,
     isStarted,
     startGame,
     stopGame,
-    loadNewCards
+    loadNewCards,
+    isLoading
   } = useGameContext();
+
+  const [isPreloaded, setIsPreloaded] = useState(false);
+
+  // Reset preloaded state when new game data arrives
+  React.useEffect(() => {
+    if (gameData) {
+      setIsPreloaded(false);
+    }
+  }, [gameData]);
+
+  // Show loading overlay when:
+  // 1. Initial load (no gameData)
+  // 2. Generating new game
+  // 3. Game data exists but images haven't been preloaded
+  const showLoading = !gameData || isGenerating || (gameData && !isPreloaded);
+
+  if (showLoading) {
+    return (
+      <Layout>
+        <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900">
+          {isGenerating ? (
+            <LoadingState 
+              message="Generating New Game..."
+              subMessage="Please wait while we create a unique game experience for you"
+            />
+          ) : !gameData ? (
+            <LoadingState 
+              message="Loading Game..."
+              subMessage="Please wait while we set up your game"
+            />
+          ) : !isPreloaded ? (
+            <ImagePreloader onComplete={() => setIsPreloaded(true)} />
+          ) : null}
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -77,16 +119,12 @@ function GameContent() {
 }
 
 function App() {
-  const [isLoaded, setIsLoaded] = useState(false);
-
   return (
     <ThemeProvider>
       <SocketProvider>
         <GameProvider>
           <DragProvider>
-            <ImagePreloader onComplete={() => setIsLoaded(true)}>
-              <GameContent />
-            </ImagePreloader>
+            <GameContent />
           </DragProvider>
         </GameProvider>
       </SocketProvider>

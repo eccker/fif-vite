@@ -35,10 +35,10 @@ export async function writeJsonFile(filePath, data) {
 
 export async function readJsonFile(filePath) {
   try {
-    // console.log(`[fileUtils.js:readJsonFile] Reading file: ${filePath}`);
+    console.log(`[fileUtils.js:readJsonFile] Reading file: ${filePath}`);
     const data = await fs.readFile(filePath, 'utf8');
     const parsed = JSON.parse(data);
-    // console.log(`[fileUtils.js:readJsonFile] File read successfully: ${filePath}`);
+    console.log(`[fileUtils.js:readJsonFile] File read successfully: ${filePath}`);
     return parsed;
   } catch (error) {
     console.error(`[fileUtils.js:readJsonFile] Error reading file ${filePath}:`, error);

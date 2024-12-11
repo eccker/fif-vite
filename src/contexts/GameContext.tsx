@@ -1,12 +1,21 @@
-import React, { createContext, useContext, useState } from 'react';
-import { initializeGameState, type GameState, getNextDeck } from '../data/imageCollection';
-import deckSamples from '../data/deckSamples.json';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useSocket } from './SocketContext';
+
+interface GameState {
+  topDeck: string[];
+  bottomDeck: string[];
+  timeLimit: number;
+  startTime: number;
+  currentSampleIndex: number;
+  currentSetIndex: number;
+}
 
 interface GameContextType {
   gameState: GameState;
   isGameOver: boolean;
   isSuccess: boolean;
   isStarted: boolean;
+  isLoading: boolean;
   lives: number;
   score: number;
   shuffleCount: number;
@@ -21,20 +30,50 @@ interface GameContextType {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 const INITIAL_LIVES = 3;
 
-
-const deckSamplesTyped: any[] = deckSamples as any[];
-const MAX_LEVEL = deckSamplesTyped.length;
+function initializeGameState(): GameState {
+  return {
+    topDeck: [],
+    bottomDeck: [],
+    timeLimit: 0,
+    startTime: Date.now(),
+    currentSampleIndex: 0,
+    currentSetIndex: 0
+  };
+}
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
+  const { gameData, requestNewGame, isGenerating } = useSocket();
   const [gameState, setGameState] = useState<GameState>(initializeGameState());
-  const [isGameOver, setIsGameOver] = useState(false);
+  const [isGameOver, setIsGameOverState] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [lives, setLives] = useState(INITIAL_LIVES);
   const [score, setScore] = useState(0);
   const [shuffleCount, setShuffleCount] = useState(0);
   const [matchedImageUrl, setMatchedImageUrl] = useState<string | null>(null);
   const [nextState, setNextState] = useState<Partial<GameState> | null>(null);
+
+  useEffect(() => {
+    setIsLoading(!gameData || isGenerating);
+  }, [gameData, isGenerating]);
+
+  useEffect(() => {
+    if (gameData) {
+      console.log('[GameContext:useEffect] Initializing game with received data');
+      const currentSample = gameData.deckSamples[0].samples[0];
+      const imageUrls = gameData.imageUrls.images;
+      
+      setGameState({
+        topDeck: currentSample.topDeck.map((index: number) => imageUrls[index]),
+        bottomDeck: currentSample.bottomDeck.map((index: number) => imageUrls[index]),
+        timeLimit: gameData.deckSamples[0].timeLimit,
+        startTime: Date.now(),
+        currentSampleIndex: 0,
+        currentSetIndex: 0
+      });
+    }
+  }, [gameData]);
 
   const calculateScore = (level: number, elapsedTime: number, currentShuffles: number) => {
     const levelScore = level * 1000;
@@ -47,20 +86,28 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const handleGameOver = (value: boolean, success: boolean = false, matchedUrl?: string) => {
     if (!value || isGameOver) return;
     
-    setIsGameOver(value);
+    setIsGameOverState(value);
     setIsSuccess(success);
     setMatchedImageUrl(matchedUrl || null);
     
     if (success) {
-      const elapsedTime = (Date.now() - gameState.startTime) / 1000;
+      const elapsedTime = Date.now() - gameState.startTime;
       const roundScore = calculateScore(gameState.currentSetIndex + 1, elapsedTime, shuffleCount);
       setScore(prevScore => prevScore + roundScore);
       
-      if (gameState.currentSetIndex === MAX_LEVEL - 1) {
+      if (gameState.currentSetIndex === gameData!.deckSamples.length - 1) {
         setIsStarted(false);
       } else {
-        const next = getNextDeck(gameState.currentSetIndex, gameState.currentSampleIndex, true);
-        setNextState(next);
+        const nextSample = gameData!.deckSamples[gameState.currentSetIndex + 1].samples[0];
+        const imageUrls = gameData!.imageUrls.images;
+        setNextState({
+          topDeck: nextSample.topDeck.map((index: number) => imageUrls[index]),
+          bottomDeck: nextSample.bottomDeck.map((index: number) => imageUrls[index]),
+          timeLimit: gameData!.deckSamples[gameState.currentSetIndex + 1].timeLimit,
+          startTime: Date.now(),
+          currentSampleIndex: 0,
+          currentSetIndex: gameState.currentSetIndex + 1
+        });
       }
     } else {
       const newLives = lives - 1;
@@ -68,7 +115,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (newLives <= 0) {
         setIsStarted(false);
       }
-      // Keep the current level's state when time expires
       setNextState({
         ...gameState,
         startTime: Date.now()
@@ -77,44 +123,51 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetGame = () => {
-    if (lives <= 0 || (isSuccess && gameState.currentSetIndex === MAX_LEVEL - 1)) {
-      // Only reset to initial state if game is over (no lives) or completed all levels
+    if (lives <= 0 || (isSuccess && gameState.currentSetIndex === gameData!.deckSamples.length - 1)) {
       setLives(INITIAL_LIVES);
       setScore(0);
-      const newState = initializeGameState();
-      setGameState(newState);
+      const currentSample = gameData!.deckSamples[0].samples[0];
+      const imageUrls = gameData!.imageUrls.images;
+      setGameState({
+        topDeck: currentSample.topDeck.map((index: number) => imageUrls[index]),
+        bottomDeck: currentSample.bottomDeck.map((index: number) => imageUrls[index]),
+        timeLimit: gameData!.deckSamples[0].timeLimit,
+        startTime: Date.now(),
+        currentSampleIndex: 0,
+        currentSetIndex: 0
+      });
     } else if (nextState) {
-      // Apply next state (either next level or retry current level)
       setGameState(state => ({
         ...state,
-        ...nextState,
-        startTime: Date.now()
+        ...nextState
       }));
       setNextState(null);
     } else {
-      // Just reset the timer
       setGameState(state => ({
         ...state,
         startTime: Date.now()
       }));
     }
     setShuffleCount(0);
-    setIsGameOver(false);
+    setIsGameOverState(false);
     setIsSuccess(false);
     setMatchedImageUrl(null);
   };
 
   const loadNewCards = () => {
-    if (isGameOver || !isStarted) return;
+    if (isGameOver || !isStarted || !gameData) return;
     
     setShuffleCount(count => count + 1);
-    setGameState(state => {
-      const nextState = getNextDeck(state.currentSetIndex, state.currentSampleIndex, false);
-      return {
-        ...state,
-        ...nextState
-      };
-    });
+    const nextSampleIndex = (gameState.currentSampleIndex + 1) % gameData.deckSamples[gameState.currentSetIndex].samples.length;
+    const nextSample = gameData.deckSamples[gameState.currentSetIndex].samples[nextSampleIndex];
+    const imageUrls = gameData.imageUrls.images;
+    
+    setGameState(state => ({
+      ...state,
+      topDeck: nextSample.topDeck.map((index: number) => imageUrls[index]),
+      bottomDeck: nextSample.bottomDeck.map((index: number) => imageUrls[index]),
+      currentSampleIndex: nextSampleIndex
+    }));
   };
 
   const startGame = () => {
@@ -123,22 +176,23 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       startTime: Date.now(),
     }));
     setIsStarted(true);
-    setIsGameOver(false);
+    setIsGameOverState(false);
     setIsSuccess(false);
     setShuffleCount(0);
     setMatchedImageUrl(null);
   };
 
   const stopGame = () => {
+    setIsLoading(true);
     setIsStarted(false);
-    setIsGameOver(false);
+    setIsGameOverState(false);
     setIsSuccess(false);
     setLives(INITIAL_LIVES);
     setScore(0);
     setShuffleCount(0);
     setMatchedImageUrl(null);
     setNextState(null);
-    setGameState(initializeGameState());
+    requestNewGame();
   };
 
   return (
@@ -147,6 +201,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       isGameOver,
       isSuccess,
       isStarted,
+      isLoading,
       lives,
       score,
       shuffleCount,

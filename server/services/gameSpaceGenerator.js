@@ -43,26 +43,17 @@ export class GameSpaceGenerator {
 
       console.log('[gameSpaceGenerator.js:generateGameSpace] Game space transformation completed');
 
-      // Ensure both src/data and dist/data directories exist
-      const srcDataDir = join(process.cwd(), 'src', 'data');
-      const distDataDir = join(process.cwd(), 'dist', 'data');
+      // Ensure metadata directory exists
+      const metadataDir = join(__dirname, '..', 'metadata');
       
-      console.log('[gameSpaceGenerator.js:generateGameSpace] Creating data directories...');
-      await Promise.all([
-        ensureDirectory(srcDataDir),
-        ensureDirectory(distDataDir)
-      ]);
+      console.log('[gameSpaceGenerator.js:generateGameSpace] Creating metadata directory...');
+      await ensureDirectory(metadataDir);
 
-      // Write to both src/data and dist/data
-      console.log('[gameSpaceGenerator.js:generateGameSpace] Writing game space files...');
-      const [srcResult, distResult] = await Promise.all([
-        writeJsonFile(join(srcDataDir, 'deckSamples.json'), gameSpace),
-        writeJsonFile(join(distDataDir, 'deckSamples.json'), gameSpace)
-      ]);
+      // Write to metadata directory
+      console.log('[gameSpaceGenerator.js:generateGameSpace] Writing game space file...');
+      await writeJsonFile(join(metadataDir, 'deckSamples.json'), gameSpace);
 
-      console.log('[gameSpaceGenerator.js:generateGameSpace] Game space files written successfully');
-      console.log(`[gameSpaceGenerator.js:generateGameSpace] Source file size: ${JSON.stringify(srcResult).length} bytes`);
-      console.log(`[gameSpaceGenerator.js:generateGameSpace] Distribution file size: ${JSON.stringify(distResult).length} bytes`);
+      console.log('[gameSpaceGenerator.js:generateGameSpace] Game space file written successfully');
       
       return gameSpace;
     } catch (error) {
@@ -89,26 +80,17 @@ export class GameSpaceGenerator {
       const imageUrls = { images };
       console.log(`[gameSpaceGenerator.js:processImageFiles] Collected ${images.length} image URLs`);
       
-      // Ensure both src/data and dist/data directories exist
-      const srcDataDir = join(process.cwd(), 'src', 'data');
-      const distDataDir = join(process.cwd(), 'dist', 'data');
+      // Ensure metadata directory exists
+      const metadataDir = join(__dirname, '..', 'metadata');
       
-      console.log('[gameSpaceGenerator.js:processImageFiles] Creating data directories...');
-      await Promise.all([
-        ensureDirectory(srcDataDir),
-        ensureDirectory(distDataDir)
-      ]);
+      console.log('[gameSpaceGenerator.js:processImageFiles] Creating metadata directory...');
+      await ensureDirectory(metadataDir);
 
-      // Write to both src/data and dist/data
-      console.log('[gameSpaceGenerator.js:processImageFiles] Writing image URL files...');
-      const [srcResult, distResult] = await Promise.all([
-        writeJsonFile(join(srcDataDir, 'imageUrls.json'), imageUrls),
-        writeJsonFile(join(distDataDir, 'imageUrls.json'), imageUrls)
-      ]);
+      // Write to metadata directory
+      console.log('[gameSpaceGenerator.js:processImageFiles] Writing image URLs file...');
+      await writeJsonFile(join(metadataDir, 'imageUrls.json'), imageUrls);
 
-      console.log('[gameSpaceGenerator.js:processImageFiles] Image URL files written successfully');
-      console.log(`[gameSpaceGenerator.js:processImageFiles] Source file size: ${JSON.stringify(srcResult).length} bytes`);
-      console.log(`[gameSpaceGenerator.js:processImageFiles] Distribution file size: ${JSON.stringify(distResult).length} bytes`);
+      console.log('[gameSpaceGenerator.js:processImageFiles] Image URLs file written successfully');
       
       return imageUrls;
     } catch (error) {
