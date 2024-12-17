@@ -13,6 +13,7 @@ interface GameState {
 interface GameContextType {
   gameState: GameState;
   isGameOver: boolean;
+  isTimeUp: boolean;
   isSuccess: boolean;
   isStarted: boolean;
   isLoading: boolean;
@@ -44,6 +45,7 @@ function initializeGameState(): GameState {
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const { gameData, requestNewGame, isGenerating } = useSocket();
   const [gameState, setGameState] = useState<GameState>(initializeGameState());
+  const [isTimeUp, setIsTimeUp] = useState(false);
   const [isGameOver, setIsGameOverState] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
@@ -86,6 +88,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const handleGameOver = (value: boolean, success: boolean = false, matchedUrl?: string) => {
     if (!value || isGameOver) return;
     
+    // Handle time's up separately from game over
+    if (!success && lives > 0) {
+      setIsTimeUp(true);
+      setIsStarted(false);
+    } else {
+      setIsTimeUp(false);
+      setIsStarted(false);
+    }
+
     setIsGameOverState(value);
     setIsSuccess(success);
     setMatchedImageUrl(matchedUrl || null);
@@ -104,7 +115,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           topDeck: nextSample.topDeck.map((index: number) => imageUrls[index]),
           bottomDeck: nextSample.bottomDeck.map((index: number) => imageUrls[index]),
           timeLimit: gameData!.deckSamples[gameState.currentSetIndex + 1].timeLimit,
-          startTime: Date.now(),
           currentSampleIndex: 0,
           currentSetIndex: gameState.currentSetIndex + 1
         });
@@ -117,15 +127,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
       setNextState({
         ...gameState,
-        startTime: Date.now()
       });
     }
   };
 
   const resetGame = () => {
+    setIsTimeUp(false);
     if (lives <= 0 || (isSuccess && gameState.currentSetIndex === gameData!.deckSamples.length - 1)) {
       setLives(INITIAL_LIVES);
       setScore(0);
+      setIsStarted(true);
       const currentSample = gameData!.deckSamples[0].samples[0];
       const imageUrls = gameData!.imageUrls.images;
       setGameState({
@@ -139,14 +150,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     } else if (nextState) {
       setGameState(state => ({
         ...state,
-        ...nextState
+        ...nextState,
+        startTime: Date.now() // Only set new start time when game is reset
       }));
+      setIsStarted(true);
       setNextState(null);
     } else {
       setGameState(state => ({
         ...state,
-        startTime: Date.now()
+        startTime: Date.now() // Only set new start time when game is reset
       }));
+      setIsStarted(true);
     }
     setShuffleCount(0);
     setIsGameOverState(false);
@@ -199,6 +213,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     <GameContext.Provider value={{ 
       gameState, 
       isGameOver,
+      isTimeUp,
       isSuccess,
       isStarted,
       isLoading,

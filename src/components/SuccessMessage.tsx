@@ -8,7 +8,7 @@ import { RetryButton } from './RetryButton';
 import deckSamples from '../data/deckSamples.json';
 
 export function SuccessMessage() {
-  const { isSuccess, lives, gameState, score, shuffleCount, resetGame } = useGameContext();
+  const { isSuccess, isTimeUp, lives, gameState, score, shuffleCount, resetGame } = useGameContext();
   const isLastLevel = gameState.currentSetIndex === deckSamples.length - 1;
   const elapsedTime = (Date.now() - gameState.startTime) / 1000;
 
@@ -46,7 +46,7 @@ export function SuccessMessage() {
               </div>
             </div>
           ) : lives > 0 ? (
-            <div>
+            <div className={isTimeUp ? 'animate-fade-in' : ''}>
               <Clock className="w-8 h-8 text-red-500 mx-auto mb-2" />
               <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1 text-center">
                 Time's Up!

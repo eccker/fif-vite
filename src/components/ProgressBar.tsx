@@ -10,21 +10,37 @@ interface ProgressBarProps {
 export function ProgressBar({ timeLimit, startTime }: ProgressBarProps) {
   const [progress, setProgress] = React.useState(100);
   const [timeLeft, setTimeLeft] = React.useState(timeLimit);
-  const { setIsGameOver, isGameOver, isSuccess, isStarted, shuffleCount } = useGameContext();
+  const { setIsGameOver, isGameOver, isTimeUp, isSuccess, isStarted, shuffleCount } = useGameContext();
+
+  const formatTime = (ms: number) => {
+    const seconds = Math.floor(ms / 1000);
+    const milliseconds = Math.floor((ms % 1000) / 10); // Get 2 digits of milliseconds
+    return `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
+  };
+
+  const getProgressColor = () => {
+    if (!isStarted) return 'bg-gray-300';
+    if (progress > 66) return 'bg-green-500';
+    if (progress > 33) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
+  // Reset progress when game is over
+  React.useEffect(() => {
+    if (isGameOver || isTimeUp) {
+      setProgress(100);
+      setTimeLeft(timeLimit);
+    }
+  }, [isGameOver, isTimeUp, timeLimit]);
 
   React.useEffect(() => {
-    if (!isStarted) {
+    if (!isStarted || isGameOver || isTimeUp) {
       setProgress(100);
       setTimeLeft(timeLimit);
       return;
     }
 
     const interval = setInterval(() => {
-      if (isGameOver) {
-        clearInterval(interval);
-        return;
-      }
-
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, timeLimit - elapsed);
       const currentProgress = (remaining / timeLimit) * 100;
@@ -39,20 +55,7 @@ export function ProgressBar({ timeLimit, startTime }: ProgressBarProps) {
     }, 16); // Update roughly every frame for smooth animation
 
     return () => clearInterval(interval);
-  }, [timeLimit, startTime, setIsGameOver, isGameOver, isSuccess, isStarted]);
-
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const milliseconds = Math.floor((ms % 1000) / 10); // Get 2 digits of milliseconds
-    return `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
-  };
-
-  const getProgressColor = () => {
-    if (!isStarted) return 'bg-gray-300';
-    if (progress > 66) return 'bg-green-500';
-    if (progress > 33) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
+  }, [timeLimit, startTime, setIsGameOver, isGameOver, isTimeUp, isSuccess, isStarted]);
 
   return (
     <div className="w-full">

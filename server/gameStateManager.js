@@ -12,22 +12,38 @@ export class GameStateManager {
     this.gameSpaceGenerator = new GameSpaceGenerator();
   }
 
-  async generateSequences(level = 100) {
+  async generateSequences(level = 6) {
     try {
-      console.log('[gameStateManager.js:generateSequences] Generating new sequences...');
+      console.log(
+        '[gameStateManager.js:generateSequences] Generating new sequences...'
+      );
       const dataDir = join(__dirname, 'data');
-      console.log('[gameStateManager.js:generateSequences] Data directory:', dataDir);
-      
-      console.log('[gameStateManager.js:generateSequences] Generating game space...');
+      console.log(
+        '[gameStateManager.js:generateSequences] Data directory:',
+        dataDir
+      );
+
+      console.log(
+        '[gameStateManager.js:generateSequences] Generating game space...'
+      );
       const gameSpace = await this.gameSpaceGenerator.generateGameSpace(level);
-      
-      console.log('[gameStateManager.js:generateSequences] Processing image files...');
-      const imageUrls = await this.gameSpaceGenerator.processImageFiles(dataDir);
-      
-      console.log('[gameStateManager.js:generateSequences] Sequences generated successfully');
+
+      console.log(
+        '[gameStateManager.js:generateSequences] Processing image files...'
+      );
+      const imageUrls = await this.gameSpaceGenerator.processImageFiles(
+        dataDir
+      );
+
+      console.log(
+        '[gameStateManager.js:generateSequences] Sequences generated successfully'
+      );
       return { gameSpace, imageUrls };
     } catch (error) {
-      console.error('[gameStateManager.js:generateSequences] Error generating sequences:', error);
+      console.error(
+        '[gameStateManager.js:generateSequences] Error generating sequences:',
+        error
+      );
       throw error;
     }
   }
@@ -35,11 +51,11 @@ export class GameStateManager {
   async createNewGame() {
     console.log('[gameStateManager.js:createNewGame] Creating new game...');
     const { gameSpace, imageUrls } = await this.generateSequences();
-    
+
     return {
       deckSamples: gameSpace,
       imageUrls: imageUrls,
-      currentLevel: 0
+      currentLevel: 0,
     };
   }
 
@@ -54,7 +70,7 @@ export class GameStateManager {
 
     return {
       level: nextLevel,
-      levelData: gameSpace[nextLevel]
+      levelData: gameSpace[nextLevel],
     };
   }
 }
