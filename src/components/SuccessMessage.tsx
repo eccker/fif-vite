@@ -5,11 +5,12 @@ import { ScoreBreakdown } from './ScoreBreakdown';
 import { ContinueButton } from './ContinueButton';
 import { SlideToTryAgain } from './SlideToTryAgain';
 import { RetryButton } from './RetryButton';
-import deckSamples from '../data/deckSamples.json';
+import { useSocket } from '../contexts/SocketContext';
 
 export function SuccessMessage() {
   const { isSuccess, isTimeUp, lives, gameState, score, shuffleCount, resetGame } = useGameContext();
-  const isLastLevel = gameState.currentSetIndex === deckSamples.length - 1;
+  const { gameData } = useSocket();
+  const isLastLevel = gameData && gameState.currentSetIndex >= gameData.deckSamples.length - 1;
   const elapsedTime = (Date.now() - gameState.startTime) / 1000;
 
   const handleComplete = () => {
@@ -23,12 +24,12 @@ export function SuccessMessage() {
           {isSuccess ? (
             <div>
               <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1 text-center">
-                {isLastLevel ? 'Congratulations!' : 'Found It!'}
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+                {isLastLevel ? '🎉 Congratulations! 🎉' : 'Found It!'}
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 text-center">
                 {isLastLevel 
-                  ? 'You completed all levels!' 
+                  ? 'Amazing! You\'ve completed all levels and mastered the game!' 
                   : 'Great job matching the images!'}
               </p>
               
@@ -41,7 +42,7 @@ export function SuccessMessage() {
               <div className="flex justify-center items-center gap-2 mt-4">
                 <Medal className="w-4 h-4 text-blue-500" />
                 <span className="font-semibold text-sm text-gray-900 dark:text-white">
-                  Total Score: {score.toLocaleString()}
+                  {isLastLevel ? 'Final Score' : 'Total Score'}: {score.toLocaleString()}
                 </span>
               </div>
             </div>

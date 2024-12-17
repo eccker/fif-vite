@@ -88,6 +88,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const handleGameOver = (value: boolean, success: boolean = false, matchedUrl?: string) => {
     if (!value || isGameOver) return;
     
+    const isLastLevel = gameData && (gameState.currentSetIndex >= gameData.deckSamples.length - 1);
+    
     // Handle time's up separately from game over
     if (!success && lives > 0) {
       setIsTimeUp(true);
@@ -106,8 +108,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const roundScore = calculateScore(gameState.currentSetIndex + 1, elapsedTime, shuffleCount);
       setScore(prevScore => prevScore + roundScore);
       
-      if (gameState.currentSetIndex === gameData!.deckSamples.length - 1) {
+      if (isLastLevel) {
         setIsStarted(false);
+        setNextState(null);
       } else {
         const nextSample = gameData!.deckSamples[gameState.currentSetIndex + 1].samples[0];
         const imageUrls = gameData!.imageUrls.images;
@@ -133,10 +136,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const resetGame = () => {
     setIsTimeUp(false);
-    if (lives <= 0 || (isSuccess && gameState.currentSetIndex === gameData!.deckSamples.length - 1)) {
+    const isLastLevel = gameData && (gameState.currentSetIndex >= gameData.deckSamples.length - 1);
+    
+    if (lives <= 0 || (isSuccess && isLastLevel)) {
       setLives(INITIAL_LIVES);
       setScore(0);
-      setIsStarted(true);
       const currentSample = gameData!.deckSamples[0].samples[0];
       const imageUrls = gameData!.imageUrls.images;
       setGameState({
@@ -147,6 +151,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         currentSampleIndex: 0,
         currentSetIndex: 0
       });
+      requestNewGame();
     } else if (nextState) {
       setGameState(state => ({
         ...state,

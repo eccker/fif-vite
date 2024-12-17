@@ -25,6 +25,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('[SocketContext:useEffect] Initializing socket connection');
     const newSocket = io('https://finditfirst.xyz', {
+    // const newSocket = io('http://localhost:3000', {
       transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
