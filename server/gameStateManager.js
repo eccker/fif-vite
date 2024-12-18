@@ -12,7 +12,7 @@ export class GameStateManager {
     this.gameSpaceGenerator = new GameSpaceGenerator();
   }
 
-  async generateSequences(level = 6) {
+  async generateSequences(level = 10) {
     try {
       console.log(
         '[gameStateManager.js:generateSequences] Generating new sequences...'
