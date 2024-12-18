@@ -137,21 +137,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const resetGame = () => {
     setIsTimeUp(false);
     const isLastLevel = gameData && (gameState.currentSetIndex >= gameData.deckSamples.length - 1);
+    const needsNewGame = lives <= 0 || (isSuccess && isLastLevel);
     
-    if (lives <= 0 || (isSuccess && isLastLevel)) {
+    if (needsNewGame) {
+      requestNewGame();
       setLives(INITIAL_LIVES);
       setScore(0);
-      const currentSample = gameData!.deckSamples[0].samples[0];
-      const imageUrls = gameData!.imageUrls.images;
-      setGameState({
-        topDeck: currentSample.topDeck.map((index: number) => imageUrls[index]),
-        bottomDeck: currentSample.bottomDeck.map((index: number) => imageUrls[index]),
-        timeLimit: gameData!.deckSamples[0].timeLimit,
-        startTime: Date.now(),
-        currentSampleIndex: 0,
-        currentSetIndex: 0
-      });
-      requestNewGame();
     } else if (nextState) {
       setGameState(state => ({
         ...state,
@@ -203,6 +194,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const stopGame = () => {
     setIsLoading(true);
+    requestNewGame();
     setIsStarted(false);
     setIsGameOverState(false);
     setIsSuccess(false);
@@ -211,7 +203,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setShuffleCount(0);
     setMatchedImageUrl(null);
     setNextState(null);
-    requestNewGame();
   };
 
   return (

@@ -17,6 +17,13 @@ import { GameProvider } from './contexts/GameContext';
 import { useGameContext } from './contexts/GameContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SocketProvider } from './contexts/SocketContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { AuthModal } from './components/AuthModal';
+import { UserMenu } from './components/UserMenu';
+import { AuthRequired } from './components/AuthRequired';
+import { ProfileModal } from './components/ProfileModal';
+import { StopConfirmModal } from './components/StopConfirmModal';
+import { useAuth } from './contexts/AuthContext';
 import { useSocket } from './contexts/SocketContext';
 
 function GameContent() {
@@ -33,6 +40,15 @@ function GameContent() {
   } = useGameContext();
 
   const [isPreloaded, setIsPreloaded] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showStopConfirm, setShowStopConfirm] = useState(false);
+  const { user } = useAuth();
+
+  const handleStopGame = () => {
+    setShowStopConfirm(false);
+    stopGame();
+  };
 
   // Reset preloaded state when new game data arrives
   React.useEffect(() => {
@@ -69,9 +85,27 @@ function GameContent() {
     );
   }
 
+  if (!user) {
+    return (
+      <Layout>
+        <Menu onProfileClick={() => setShowProfileModal(true)} />
+        {/* <UserMenu onAuthClick={() => setShowAuthModal(true)} /> */}
+        <AuthRequired onAuthClick={() => setShowAuthModal(true)} />
+        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <Menu />
+      <Menu onProfileClick={() => setShowProfileModal(true)} />
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
+      <StopConfirmModal
+        isOpen={showStopConfirm}
+        onClose={() => setShowStopConfirm(false)}
+        onConfirm={handleStopGame}
+      />
       <header className="flex-none text-center mb-2">
         <div className="flex items-center justify-center gap-2">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Find It First</h1>
@@ -106,7 +140,7 @@ function GameContent() {
         {!isGameOver && (
           isStarted ? (
             <>
-              <StopButton onClick={stopGame} />
+              <StopButton onClick={() => setShowStopConfirm(true)} />
               <ReloadButton onClick={loadNewCards} />
             </>
           ) : (
@@ -121,13 +155,15 @@ function GameContent() {
 function App() {
   return (
     <ThemeProvider>
-      <SocketProvider>
-        <GameProvider>
-          <DragProvider>
-            <GameContent />
-          </DragProvider>
-        </GameProvider>
-      </SocketProvider>
+      <AuthProvider>
+        <SocketProvider>
+          <GameProvider>
+            <DragProvider>
+              <GameContent />
+            </DragProvider>
+          </GameProvider>
+        </SocketProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

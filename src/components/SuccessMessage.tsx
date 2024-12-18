@@ -6,14 +6,34 @@ import { ContinueButton } from './ContinueButton';
 import { SlideToTryAgain } from './SlideToTryAgain';
 import { RetryButton } from './RetryButton';
 import { useSocket } from '../contexts/SocketContext';
+import { saveScore } from '../services/scoreService';
 
 export function SuccessMessage() {
   const { isSuccess, isTimeUp, lives, gameState, score, shuffleCount, resetGame } = useGameContext();
   const { gameData } = useSocket();
   const isLastLevel = gameData && gameState.currentSetIndex >= gameData.deckSamples.length - 1;
   const elapsedTime = (Date.now() - gameState.startTime) / 1000;
+  const [scoreSaved, setScoreSaved] = React.useState(false);
+
+  React.useEffect(() => {
+    const saveGameScore = async () => {
+      if (!scoreSaved && (
+        (isSuccess && isLastLevel) || 
+        lives <= 0 || 
+        (isTimeUp && lives <= 0)
+      )) {
+        const completed = isSuccess && isLastLevel;
+        console.log('Saving score:', { score, completed });
+        await saveScore(score, completed);
+        setScoreSaved(true);
+      }
+    };
+    
+    saveGameScore();
+  }, [isSuccess, isLastLevel, score, scoreSaved, lives, isTimeUp]);
 
   const handleComplete = () => {
+    setScoreSaved(false);
     resetGame();
   };
 
