@@ -48,9 +48,9 @@ export class GameStateManager {
     }
   }
 
-  async createNewGame() {
+  async createNewGame(levels) {
     console.log('[gameStateManager.js:createNewGame] Creating new game...');
-    const { gameSpace, imageUrls } = await this.generateSequences();
+    const { gameSpace, imageUrls } = await this.generateSequences(levels);
 
     return {
       deckSamples: gameSpace,
@@ -59,9 +59,9 @@ export class GameStateManager {
     };
   }
 
-  async getNextLevel(currentLevel) {
-    console.log('[gameStateManager.js:getNextLevel] Getting next level...');
-    const { gameSpace } = await this.generateSequences();
+  async getNextLevel(currentLevel, levels) {
+    console.log('***********[gameStateManager.js:getNextLevel] Getting next level...');
+    const { gameSpace } = await this.generateSequences(levels);
 
     const nextLevel = currentLevel + 1;
     if (nextLevel >= gameSpace.length) {

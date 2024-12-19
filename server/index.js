@@ -33,11 +33,11 @@ async function startServer() {
     io.on('connection', (socket) => {
       console.log('[server/index.js:io.connection] Client connected');
 
-      socket.on('requestNewGame', async () => {
-      console.log('[server/index.js:requestNewGame] New Game Requested');
-        
+      socket.on('requestNewGame', async (levels) => {
+        console.log('[server/index.js:requestNewGame] New Game Requested');
+
         try {
-          const gameData = await gameStateManager.createNewGame();
+          const gameData = await gameStateManager.createNewGame(levels);
           socket.emit('gameData', gameData);
         } catch (error) {
           console.error('[server/index.js:requestNewGame] Error handling requestNewGame:', error);
@@ -45,9 +45,9 @@ async function startServer() {
         }
       });
 
-      socket.on('requestNextLevel', async (currentLevel) => {
+      socket.on('requestNextLevel', async (currentLevel, levels) => {
         try {
-          const nextLevelData = await gameStateManager.getNextLevel(currentLevel);
+          const nextLevelData = await gameStateManager.getNextLevel(currentLevel, levels);
           socket.emit('nextLevelData', nextLevelData);
         } catch (error) {
           console.error('[server/index.js:requestNextLevel] Error handling requestNextLevel:', error);

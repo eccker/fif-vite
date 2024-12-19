@@ -1,6 +1,7 @@
 import { 
   getAuth, 
   updateProfile,
+  sendEmailVerification as firebaseSendEmailVerification,
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -52,6 +53,19 @@ export function onAuthChange(callback: (user: User | null) => void) {
 
 export function getCurrentUser() {
   return auth.currentUser;
+}
+
+export async function sendEmailVerification() {
+  const user = getCurrentUser();
+  if (!user) {
+    throw new Error('No user is currently signed in');
+  }
+
+  try {
+    await firebaseSendEmailVerification(user);
+  } catch (error) {
+    handleFirebaseError('Failed to send verification email', error);
+  }
 }
 
 interface ProfileUpdateData {

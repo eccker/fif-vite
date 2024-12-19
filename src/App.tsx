@@ -23,6 +23,7 @@ import { UserMenu } from './components/UserMenu';
 import { AuthRequired } from './components/AuthRequired';
 import { ProfileModal } from './components/ProfileModal';
 import { StopConfirmModal } from './components/StopConfirmModal';
+import { EmailVerificationBanner } from './components/EmailVerificationBanner';
 import { useAuth } from './contexts/AuthContext';
 import { useSocket } from './contexts/SocketContext';
 
@@ -43,6 +44,7 @@ function GameContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showStopConfirm, setShowStopConfirm] = useState(false);
+  const [showVerifyBanner, setShowVerifyBanner] = useState(true);
   const { user } = useAuth();
 
   const handleStopGame = () => {
@@ -61,7 +63,8 @@ function GameContent() {
   // 1. Initial load (no gameData)
   // 2. Generating new game
   // 3. Game data exists but images haven't been preloaded
-  const showLoading = !gameData || isGenerating || (gameData && !isPreloaded);
+  const showLoading = isGenerating || (gameData && !isPreloaded);
+  // const showLoading = !gameData || isGenerating || (gameData && !isPreloaded);
 
   if (showLoading) {
     return (
@@ -99,6 +102,11 @@ function GameContent() {
   return (
     <Layout>
       <Menu onProfileClick={() => setShowProfileModal(true)} />
+      {user && !user.emailVerified && !user.isAnonymous && showVerifyBanner && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-50">
+          <EmailVerificationBanner onClose={() => setShowVerifyBanner(false)} />
+        </div>
+      )}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
       <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
       <StopConfirmModal

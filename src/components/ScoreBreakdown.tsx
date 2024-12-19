@@ -62,7 +62,8 @@ export function ScoreBreakdown({ level, elapsedTime, shuffles }: ScoreBreakdownP
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1 min-w-0">
             <Clock className="w-4 h-4 text-green-500 flex-none" />
-            <span className="text-gray-600 dark:text-gray-300 truncate">Time ({Math.round(timeRatio * 100)}%)</span>
+
+            <span className="text-gray-600 dark:text-gray-300 truncate">Time ({elapsedTime.toFixed(2)} s de {(Math.round((gameState.timeLimit/1000) * 100) / 100).toFixed(2)})</span>
           </div>
           <span className="font-medium text-gray-900 dark:text-white flex-none">+{timeScore.toLocaleString()}</span>
         </div>

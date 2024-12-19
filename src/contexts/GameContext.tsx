@@ -30,6 +30,7 @@ interface GameContextType {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 const INITIAL_LIVES = 3;
+const INITAL_LEVELS = 7;
 
 function initializeGameState(): GameState {
   return {
@@ -140,7 +141,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const needsNewGame = lives <= 0 || (isSuccess && isLastLevel);
     
     if (needsNewGame) {
-      requestNewGame();
+      // requestNewGame(INITAL_LEVELS);
       setLives(INITIAL_LIVES);
       setScore(0);
     } else if (nextState) {
@@ -181,6 +182,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const startGame = () => {
+    requestNewGame(INITAL_LEVELS);
+    setLives(INITIAL_LIVES);
+    setScore(0);
+
     setGameState(state => ({
       ...state,
       startTime: Date.now(),
@@ -194,7 +199,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const stopGame = () => {
     setIsLoading(true);
-    requestNewGame();
+    // requestNewGame(INITAL_LEVELS);
     setIsStarted(false);
     setIsGameOverState(false);
     setIsSuccess(false);

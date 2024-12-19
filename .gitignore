@@ -25,7 +25,6 @@ dist-ssr
 
 .env
 .env.local
-.env.*.loca
-
+.env.*.local
 server/data/*.json
 server/metadata/*.json

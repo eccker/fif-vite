@@ -24,7 +24,7 @@ export function SuccessMessage() {
       )) {
         const completed = isSuccess && isLastLevel;
         console.log('Saving score:', { score, completed });
-        await saveScore(score, completed);
+        await saveScore(score, completed ?? false);
         setScoreSaved(true);
       }
     };

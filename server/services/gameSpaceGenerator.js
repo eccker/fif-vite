@@ -43,17 +43,17 @@ export class GameSpaceGenerator {
 
       console.log('[gameSpaceGenerator.js:generateGameSpace] Game space transformation completed');
 
-      // Ensure metadata directory exists
-      const metadataDir = join(__dirname, '..', 'metadata');
+      // // Ensure metadata directory exists
+      // const metadataDir = join(__dirname, '..', 'metadata');
       
-      console.log('[gameSpaceGenerator.js:generateGameSpace] Creating metadata directory...');
-      await ensureDirectory(metadataDir);
+      // console.log('[gameSpaceGenerator.js:generateGameSpace] Creating metadata directory...');
+      // await ensureDirectory(metadataDir);
 
-      // Write to metadata directory
-      console.log('[gameSpaceGenerator.js:generateGameSpace] Writing game space file...');
-      await writeJsonFile(join(metadataDir, 'deckSamples.json'), gameSpace);
+      // // Write to metadata directory
+      // console.log('[gameSpaceGenerator.js:generateGameSpace] Writing game space file...');
+      // await writeJsonFile(join(metadataDir, 'deckSamples.json'), gameSpace);
 
-      console.log('[gameSpaceGenerator.js:generateGameSpace] Game space file written successfully');
+      // console.log('[gameSpaceGenerator.js:generateGameSpace] Game space file written successfully');
       
       return gameSpace;
     } catch (error) {
@@ -71,7 +71,7 @@ export class GameSpaceGenerator {
       
       for (let index = 0; index < 256; index++) {
         const fileToOpen = files[getRandomInt(files.length)];
-        console.log(`[gameSpaceGenerator.js:processImageFiles] Processing file ${index + 1}/256: ${fileToOpen}`);
+        // console.log(`[gameSpaceGenerator.js:processImageFiles] Processing file ${index + 1}/256: ${fileToOpen}`);
         const data = await readJsonFile(join(process.cwd(), 'server', 'data', fileToOpen));
         const objFromFile = data[getRandomInt(data.length)];
         images.push(objFromFile.urls.thumb);
@@ -80,17 +80,17 @@ export class GameSpaceGenerator {
       const imageUrls = { images };
       console.log(`[gameSpaceGenerator.js:processImageFiles] Collected ${images.length} image URLs`);
       
-      // Ensure metadata directory exists
-      const metadataDir = join(__dirname, '..', 'metadata');
+      // // Ensure metadata directory exists
+      // const metadataDir = join(__dirname, '..', 'metadata');
       
-      console.log('[gameSpaceGenerator.js:processImageFiles] Creating metadata directory...');
-      await ensureDirectory(metadataDir);
+      // console.log('[gameSpaceGenerator.js:processImageFiles] Creating metadata directory...');
+      // await ensureDirectory(metadataDir);
 
-      // Write to metadata directory
-      console.log('[gameSpaceGenerator.js:processImageFiles] Writing image URLs file...');
-      await writeJsonFile(join(metadataDir, 'imageUrls.json'), imageUrls);
+      // // Write to metadata directory
+      // console.log('[gameSpaceGenerator.js:processImageFiles] Writing image URLs file...');
+      // await writeJsonFile(join(metadataDir, 'imageUrls.json'), imageUrls);
 
-      console.log('[gameSpaceGenerator.js:processImageFiles] Image URLs file written successfully');
+      // console.log('[gameSpaceGenerator.js:processImageFiles] Image URLs file written successfully');
       
       return imageUrls;
     } catch (error) {
