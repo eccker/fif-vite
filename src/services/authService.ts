@@ -14,6 +14,8 @@ import {
 } from 'firebase/auth';
 import { app } from './firebase';
 
+import { handleFirebaseError } from '../utils/errorHandling';
+
 const auth = getAuth(app);
 
 export interface SignUpData {

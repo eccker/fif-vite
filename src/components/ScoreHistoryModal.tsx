@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Trophy, Clock } from 'lucide-react';
 import { getUserScores, GameScore } from '../services/scoreService';
-import { handleFirebaseError } from '../utils/errorHandling';
+
 
 interface ScoreHistoryModalProps {
   isOpen: boolean;
