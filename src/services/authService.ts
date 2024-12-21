@@ -44,6 +44,8 @@ export async function signInAnon() {
 }
 
 export async function signOut() {
+  // Dispatch a custom event before signing out
+  window.dispatchEvent(new Event('userLogout'));
   await firebaseSignOut(auth);
 }
 

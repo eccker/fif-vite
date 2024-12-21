@@ -11,8 +11,8 @@ interface SocketContextType {
   socket: Socket | null;
   gameData: GameData | null;
   isGenerating: boolean;
-  requestNewGame: (levels: number) => void;
-  requestNextLevel: (currentLevel: number, levels: number) => void;
+  requestNewGame: (levels?: number) => void;
+  requestNextLevel: (currentLevel: number, levels?: number) => void;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -35,8 +35,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     newSocket.on('connect', () => {
       console.log('[SocketContext:socket.connect] Socket connected');
       setSocket(newSocket);
-      setIsGenerating(true);
-      newSocket.emit('requestNewGame', 1);
     });
 
     newSocket.on('connect_error', (error) => {
@@ -84,7 +82,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, [socket]);
 
-  const requestNewGame = (levels: number) => {
+  const requestNewGame = (levels?: number) => {
     if (socket?.connected) {
       console.log('[SocketContext:requestNewGame] Requesting new game');
       setIsGenerating(true);
@@ -95,7 +93,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const requestNextLevel = (currentLevel: number, levels: number) => {
+  const requestNextLevel = (currentLevel: number, levels?: number) => {
     if (socket?.connected) {
       console.log('[SocketContext:requestNextLevel] Requesting next level:', currentLevel);
       socket.emit('requestNextLevel', currentLevel, levels);

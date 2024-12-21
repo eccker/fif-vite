@@ -47,6 +47,20 @@ function GameContent() {
   const [showVerifyBanner, setShowVerifyBanner] = useState(true);
   const { user } = useAuth();
 
+  // Handle cleanup on logout
+  React.useEffect(() => {
+    const handleLogout = () => {
+      stopGame();
+      setShowAuthModal(false);
+      setShowProfileModal(false);
+      setShowStopConfirm(false);
+      setShowVerifyBanner(false);
+    };
+
+    window.addEventListener('userLogout', handleLogout);
+    return () => window.removeEventListener('userLogout', handleLogout);
+  }, [stopGame]);
+
   const handleStopGame = () => {
     setShowStopConfirm(false);
     stopGame();

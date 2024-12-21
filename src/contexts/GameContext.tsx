@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSocket } from './SocketContext';
+import { useAuth } from './AuthContext';
 
 interface GameState {
   topDeck: string[];
@@ -30,7 +31,8 @@ interface GameContextType {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 const INITIAL_LIVES = 3;
-const INITAL_LEVELS = 7;
+const ANONYMOUS_LEVELS = 8;
+const EMAIL_LEVELS = 25;
 
 function initializeGameState(): GameState {
   return {
@@ -56,6 +58,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [shuffleCount, setShuffleCount] = useState(0);
   const [matchedImageUrl, setMatchedImageUrl] = useState<string | null>(null);
   const [nextState, setNextState] = useState<Partial<GameState> | null>(null);
+  const { user } = useAuth();
+
+  const maxLevels = React.useMemo(() => {
+    return user?.isAnonymous ? ANONYMOUS_LEVELS : EMAIL_LEVELS;
+  }, [user?.isAnonymous]);
 
   useEffect(() => {
     setIsLoading(!gameData || isGenerating);
@@ -141,7 +148,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const needsNewGame = lives <= 0 || (isSuccess && isLastLevel);
     
     if (needsNewGame) {
-      // requestNewGame(INITAL_LEVELS);
+      // requestNewGame(maxLevels);
       setLives(INITIAL_LIVES);
       setScore(0);
     } else if (nextState) {
@@ -182,7 +189,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const startGame = () => {
-    requestNewGame(INITAL_LEVELS);
+    requestNewGame(maxLevels);
     setLives(INITIAL_LIVES);
     setScore(0);
 
@@ -199,7 +206,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const stopGame = () => {
     setIsLoading(true);
-    // requestNewGame(INITAL_LEVELS);
     setIsStarted(false);
     setIsGameOverState(false);
     setIsSuccess(false);
@@ -208,6 +214,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setShuffleCount(0);
     setMatchedImageUrl(null);
     setNextState(null);
+    setIsTimeUp(false);
+    setGameState(initializeGameState());
   };
 
   return (

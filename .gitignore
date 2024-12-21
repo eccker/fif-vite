@@ -28,3 +28,6 @@ dist-ssr
 .env.*.local
 server/data/*.json
 server/metadata/*.json
+
+server/metadata/deckSamples.json
+server/metadata/imageUrls.json
