@@ -4,16 +4,13 @@ import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { GameStateManager } from './gameStateManager.js';
-import { ensureDirectory } from './utils/fileUtils.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function startServer() {
   try {
-    // Ensure metadata directory exists
-    const metadataDir = join(__dirname, 'metadata');
-    await ensureDirectory(metadataDir);
 
     const app = express();
     const httpServer = createServer(app);
@@ -32,13 +29,21 @@ async function startServer() {
 
     io.on('connection', (socket) => {
       console.log('[server/index.js:io.connection] Client connected');
-
+      // socket.emit('gameData', { deckSamples: [], imageUrls: [], currentLevel: 0 });
       socket.on('requestNewGame', async (levels) => {
         console.log('[server/index.js:requestNewGame] New Game Requested');
 
         try {
           const gameData = await gameStateManager.createNewGame(levels);
+          console.log(`type of gameData: ${typeof gameData}`);
+          // console.log(`gameData: ${JSON.stringify(gameData)}`);
+          console.log(`gameData: ${gameData.length}`);
+          const stringifiedGameData = JSON.stringify(gameData);
+          const gameDataByteSize = new TextEncoder().encode(stringifiedGameData).length;
+          console.log(`gameData byte size: ${gameDataByteSize}`);
           socket.emit('gameData', gameData);
+          // socket.emit('gameData', { deckSamples: [1,2,3,4], imageUrls: {"images":["https://images.unsplash.com/photo-1546484396-fb3fc6f95f98?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyODE0NDJ8MHwxfHNlYXJjaHw2fHxzb2xpZHxlbnwwfDB8fHwxNjM5Mjc2Mjc5&ixlib=rb-1.2.1&q=80&w=200"]}, currentLevel: 0 });
+
         } catch (error) {
           console.error('[server/index.js:requestNewGame] Error handling requestNewGame:', error);
           socket.emit('error', { message: 'Failed to create new game' });
