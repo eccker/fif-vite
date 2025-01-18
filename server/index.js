@@ -17,7 +17,7 @@ async function startServer() {
     const io = new Server(httpServer, {
       cors: {
         // origin: "http://localhost:3000",
-        origin: "https://finditfirst.xyz",
+        origin: ["https://finditfirst.xyz","*"],
         methods: ["GET", "POST"]
       }
     });
